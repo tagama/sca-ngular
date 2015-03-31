@@ -148,12 +148,13 @@ angular.module('sca-ngular', ['http-auth-interceptor'])
     .directive('loginPanel', function (loginService, $document, $location) {
         return {
             restrict: 'A',
-            templateUrl: 'bower_components/sca-ngular/login.html'
+            template: '<div class="form-box" id="login-box" ng-controller="loginController" ng-hide="isAuthenticated"><div class="header"><i class="fa fa-lock"></i> Área Restrita</div><form name="loginForm"><div class="body bg-gray"><div class="form-group" show-errors><input type="text" name="username" ng-model="username" class="form-control" placeholder="Login"/><span class="help-block" ng-show="loginForm.username.$error.required">Obrigatório</span></div><div class="form-group" show-errors><input type="password" name="password" ng-model="password" class="form-control" placeholder="Senha"/><span class="help-block" ng-show="loginForm.password.$error.required">Obrigatório</span></div></div><div class="footer bg-gray"><button type="submit" ng-click="submit()" class="btn btn-primary btn-block">Autenticar</button><div class="alert alert-danger alert-dismissable" ng-show="authenticationError"><b>Usuário ou senha inválido!</b></div></div></form></div>'
         }
     })
     .directive('userPanel', function (loginService, $document, $location) {
         return {
             restrict: 'A',
-            templateUrl: 'bower_components/sca-ngular/user.html'
+            template: '<div class="navbar-right" ng-controller="userController" ng-show="isAuthenticated"><ul class="nav navbar-nav"><li class="dropdown user user-menu"><a href="" class="dropdown-toggle" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <span class="user-name">{{user.login}}<i class="caret"></i></span></a><ul class="dropdown-menu"><li class="user-header bg-light-blue"><img src="images/avatar5.png" class="img-circle" alt="User Image"><p>{{user.nome}}<small>Perfil: {{user.perfil}}</small></p></li><li class="user-footer"><div class="pull-right"><a href="" ng-click="logout()" class="btn btn-default"> Sair</a></div></li></ul></li></ul></div>'
         }
     });
+
