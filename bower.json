@@ -4,6 +4,7 @@
     },
     "name": "sca-ngular",
     "version": "0.0.1",
+    "ignore": [],
     "main": ["./sca-ngular.js"],
     "dependencies": {
         "angular": "^1.2",
