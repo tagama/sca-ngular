@@ -9,7 +9,7 @@ angular.module('sca-ngular', ['http-auth-interceptor'])
 
         $scope.authenticationError = false;
 
-        function sanitizeCredentials(credentials) {
+        function sanitizeCredentials() {
             return {
                 username: $sanitize($scope.username),
                 password: $sanitize($scope.password),
@@ -21,16 +21,17 @@ angular.module('sca-ngular', ['http-auth-interceptor'])
 
             $scope.authenticationError = false;
 
-            loginService.login(sanitizeCredentials(), function (data) {
-                loginService.activateLogin(data);
-            }, function (data) {
-                loginService.logout(data);
-                $scope.authenticationError = true;
-            });
+            loginService.login(sanitizeCredentials(),
+                function (data) {
+                    loginService.activateLogin(data);
+                }, function (data) {
+                    loginService.logout(data);
+                    $scope.authenticationError = true;
+                });
         };
 
     }])
-    .controller('userController', ['$scope', 'loginService', '$document',  function ($scope, loginService) {
+    .controller('userController', ['$scope', 'loginService', '$document', function ($scope, loginService) {
 
         $scope.logout = function () {
             loginService.logout();
@@ -50,9 +51,12 @@ angular.module('sca-ngular', ['http-auth-interceptor'])
         });
 
     }])
-    .factory('loginService', ['$resource', 'authService', '$rootScope','scangularConfig',
+    .factory('loginService', ['$resource', 'authService', '$rootScope', 'scangularConfig',
         function ($resource, authService, $rootScope, scangularConfig) {
-            var service = $resource('/'+ scangularConfig.applicationName +'/api/authentication', {'username': '@username', 'password': '@password'}, {
+            var service = $resource('/' + scangularConfig.applicationName + '/api/authentication', {
+                'username': '@username',
+                'password': '@password'
+            }, {
                 'login': {
                     method: 'POST',
                     isArray: false,
@@ -61,23 +65,24 @@ angular.module('sca-ngular', ['http-auth-interceptor'])
                 },
                 'logoutApi': {
                     method: 'GET',
-                    url: '/'+ scangularConfig.applicationName +'/api/logout',
+                    url: '/' + scangularConfig.applicationName + '/api/logout',
                     isArray: true,
                     ignoreAuthModule: 'ignoreAuthModule'
                 },
                 'authenticate': {
                     method: 'GET',
-                    url: '/'+ scangularConfig.applicationName +'/api/authenticate',
+                    url: '/' + scangularConfig.applicationName + '/api/authenticate',
                     isArray: false,
                     ignoreAuthModule: 'ignoreAuthModule'
                 },
                 'user': {
                     method: 'GET',
-                    url: '/'+ scangularConfig.applicationName +'/api/user',
-                    isArray: false},
+                    url: '/' + scangularConfig.applicationName + '/api/user',
+                    isArray: false
+                },
                 'goToPerfil': {
                     method: 'GET',
-                    url: '/'+ scangularConfig.applicationName +'/api/goToPerfil/:codigo',
+                    url: '/' + scangularConfig.applicationName + '/api/goToPerfil/:codigo',
                     params: {codigo: '@codigo'},
                     isArray: false
                 }
@@ -90,11 +95,12 @@ angular.module('sca-ngular', ['http-auth-interceptor'])
             };
 
             service.activateLogin = function (obj) {
-                authService.loginConfirmed(obj);
                 currentUser = {username: obj.username, permissions: {}, userDetails: {}};
                 service.authenticate({}, function (userDetails) {
                     service.setUserDetails(userDetails);
+                    authService.loginConfirmed(obj);
                 });
+
             };
 
             service.logout = function (data) {
@@ -145,13 +151,13 @@ angular.module('sca-ngular', ['http-auth-interceptor'])
             }
         }
     })
-    .directive('loginPanel', function (loginService, $document, $location) {
+    .directive('loginPanel', function () {
         return {
             restrict: 'A',
-            template: '<div class="form-box" id="login-box" ng-controller="loginController" ng-hide="isAuthenticated"><div class="header"><i class="fa fa-lock"></i> Área Restrita</div><form name="loginForm"><div class="body bg-gray"><div class="form-group" show-errors><input type="text" name="username" ng-model="username" class="form-control" placeholder="Login"/><span class="help-block" ng-show="loginForm.username.$error.required">Obrigatório</span></div><div class="form-group" show-errors><input type="password" name="password" ng-model="password" class="form-control" placeholder="Senha"/><span class="help-block" ng-show="loginForm.password.$error.required">Obrigatório</span></div></div><div class="footer bg-gray"><button type="submit" ng-click="submit()" class="btn btn-primary btn-block">Autenticar</button><div class="alert alert-danger alert-dismissable" ng-show="authenticationError"><b>Usuário ou senha inválido!</b></div></div></form></div>'
+            template: '<div block-ui block-ui-pattern="/.*\/api\/authentication/"><div class="form-box" id="login-box" ng-controller="loginController" ng-hide="isAuthenticated"><div class="header"><i class="fa fa-lock"></i> Área Restrita</div><form name="loginForm"><div class="body bg-gray"><div class="form-group" show-errors><input type="text" name="username" ng-model="username" class="form-control" placeholder="Login"/><span class="help-block" ng-show="loginForm.username.$error.required">Obrigatório</span></div><div class="form-group" show-errors><input type="password" name="password" ng-model="password" class="form-control" placeholder="Senha"/><span class="help-block" ng-show="loginForm.password.$error.required">Obrigatório</span></div></div><div class="footer bg-gray"><button type="submit" ng-click="submit()" class="btn btn-primary btn-block">Autenticar</button><div class="alert alert-danger alert-dismissable" ng-show="authenticationError"><b>Usuário ou senha inválido!</b></div></div></form></div></div>'
         }
     })
-    .directive('userPanel', function (loginService, $document, $location) {
+    .directive('userPanel', function () {
         return {
             restrict: 'A',
             template: '<div class="navbar-right" ng-controller="userController" ng-show="isAuthenticated"><ul class="nav navbar-nav"><li class="dropdown user user-menu"><a href="" class="dropdown-toggle" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <span class="user-name">{{user.login}}<i class="caret"></i></span></a><ul class="dropdown-menu"><li class="user-header bg-light-blue"><img src="images/avatar5.png" class="img-circle" alt="User Image"><p>{{user.nome}}<small>Perfil: {{user.perfil}}</small></p></li><li class="user-footer"><div class="pull-right"><a href="" ng-click="logout()" class="btn btn-default"> Sair</a></div></li></ul></li></ul></div>'
