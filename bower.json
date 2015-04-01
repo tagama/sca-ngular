@@ -3,12 +3,13 @@
         "name": "https://github.com/tagama"
     },
     "name": "sca-ngular",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "ignore": [],
     "main": ["./sca-ngular.js"],
     "dependencies": {
         "angular": "^1.2",
-        "angular-http-auth": "1.2.1"
+        "angular-http-auth": "1.2.1",
+        "angular-base64": "2.0.3"
 
     }
 }

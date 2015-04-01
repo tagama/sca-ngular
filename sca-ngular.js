@@ -1,18 +1,18 @@
 'use strict';
 
-angular.module('sca-ngular', ['http-auth-interceptor'])
+angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
     .constant('scangularConfig', {
         applicationName: 'scangularConfig.applicationName'
 
     })
-    .controller('loginController', ['$scope', 'loginService', 'authService', '$document', '$sanitize', function ($scope, loginService, authService, $document, $sanitize) {
+    .controller('loginController', ['$scope', 'loginService', 'authService', '$document', '$sanitize','$base64', function ($scope, loginService, authService, $document, $sanitize,$base64) {
 
         $scope.authenticationError = false;
 
         function sanitizeCredentials() {
             return {
                 username: $sanitize($scope.username),
-                password: $sanitize($scope.password),
+                password: $base64.encode($sanitize($scope.password)),
                 ignoreAuthModule: 'ignoreAuthModule'
             };
         }
@@ -154,7 +154,7 @@ angular.module('sca-ngular', ['http-auth-interceptor'])
     .directive('loginPanel', function () {
         return {
             restrict: 'A',
-            template: '<div block-ui block-ui-pattern="/.*\/api\/authentication/"><div class="form-box" id="login-box" ng-controller="loginController" ng-hide="isAuthenticated"><div class="header"><i class="fa fa-lock"></i> Área Restrita</div><form name="loginForm"><div class="body bg-gray"><div class="form-group" show-errors><input type="text" name="username" ng-model="username" class="form-control" placeholder="Login"/><span class="help-block" ng-show="loginForm.username.$error.required">Obrigatório</span></div><div class="form-group" show-errors><input type="password" name="password" ng-model="password" class="form-control" placeholder="Senha"/><span class="help-block" ng-show="loginForm.password.$error.required">Obrigatório</span></div></div><div class="footer bg-gray"><button type="submit" ng-click="submit()" class="btn btn-primary btn-block">Autenticar</button><div class="alert alert-danger alert-dismissable" ng-show="authenticationError"><b>Usuário ou senha inválido!</b></div></div></form></div></div>'
+            template: '<div block-ui block-ui-pattern="/.*\/api\/authentication/"><div class="form-box" id="login-box" ng-controller="loginController" ng-hide="isAuthenticated"><div class="header"><i class="fa fa-lock"></i> Área Restrita</div><form name="loginForm"><div class="body bg-gray"><div class="form-group" show-errors><input type="text" name="username" ng-model="username" class="form-control" placeholder="Login"/><span class="help-block" ng-show="loginForm.username.$error.required">Obrigatório</span></div><div class="form-group" show-errors><input type="password" name="password" ng-model="password" class="form-control" placeholder="Senha"/><span class="help-block" ng-show="loginForm.password.$error.required">Obrigatório</span></div></div><div class="footer bg-gray"><button type="submit" ng-click="submit()" class="btn btn-primary btn-block">Autenticar</button><div class="alert alert-danger alert-dismissable" ng-show="authenticationError"><b>Usuário ou senha inválida!</b></div></div></form></div></div>'
         }
     })
     .directive('userPanel', function () {
