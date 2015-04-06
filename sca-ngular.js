@@ -160,7 +160,7 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
     .directive('userPanel', function () {
         return {
             restrict: 'A',
-            template: '<div class="navbar-right" ng-controller="userController" ng-show="isAuthenticated"><ul class="nav navbar-nav"><li class="dropdown user user-menu"><a href="" class="dropdown-toggle" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <span class="user-name">{{user.login}}<i class="caret"></i></span></a><ul class="dropdown-menu"><li class="user-header bg-light-blue"><img src="images/avatar5.png" class="img-circle" alt="User Image"><p>{{user.nome}}<small>Perfil: {{user.perfil}}</small></p></li><li class="user-footer"><div class="pull-right"><a href="" ng-click="logout()" class="btn btn-default"> Sair</a></div></li></ul></li></ul></div>'
+            template: '<div class="navbar-right" ng-controller="userController" ng-show="isAuthenticated"><ul class="nav navbar-nav"><li class="dropdown user user-menu"><a href="" class="dropdown-toggle" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i> <span class="user-name">{{user.login}}<i class="caret"></i></span></a><ul class="dropdown-menu"><li class="user-header bg-light-blue"><p>{{user.nome}}<small>Perfil: {{user.perfil}}</small></p></li><li class="user-footer"><div class="pull-right"><a href="" ng-click="logout()" class="btn btn-default"> Sair</a></div></li></ul></li></ul></div>'
         }
     });
 
