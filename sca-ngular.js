@@ -142,6 +142,7 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
                         scope.isAuthenticated = true;
                         loginService.setUserDetails(data);
                     }, function (data) {
+
                         scope.isAuthenticated = false;
                     });
                 }
