@@ -180,7 +180,7 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
                                         '</div>' +
                                     '</div>' +
                                     '<div class="footer bg-gray">' +
-                                        '<button type="submit" ng-click="submit()" class="btn btn-primary btn-block" ng-disabled="loginForm.$invalid">Autenticar</button>' +
+                                        '<button title="autenticar" alt="autenticar" type="submit" ng-click="submit()" class="btn btn-primary btn-block" ng-disabled="loginForm.$invalid">Autenticar</button>' +
                                         '<div class="alert alert-danger alert-dismissable" ng-show="authenticationError"><b>Usuário ou Senha inválida!</b></div>' +
                                     '</div>' +
                                 '</form>' +
