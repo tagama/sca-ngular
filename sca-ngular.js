@@ -136,13 +136,15 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
             link: function (scope, elem, attrs) {
 
                 scope.isAuthenticated = false;
+                scope.loadingPanel = true;
 
                 if (loginService.getCurrentUser() === null || loginService.getCurrentUser().username === null || loginService.getCurrentUser().username === '') {
                     loginService.authenticate({}, function (data) {
                         scope.isAuthenticated = true;
+                        scope.loadingPanel = false;
                         loginService.setUserDetails(data);
                     }, function (data) {
-
+                        scope.loadingPanel = false;
                         scope.isAuthenticated = false;
                     });
                 }
@@ -164,7 +166,7 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
         return {
             restrict: 'A',
             template:'<div block-ui block-ui-pattern="/.*\/api\/authentication/">' +
-                            '<div class="form-box" id="login-box" ng-controller="loginController" ng-hide="isAuthenticated">' +
+                            '<div class="form-box" id="login-box" ng-controller="loginController" ng-hide="isAuthenticated || loadingPanel">' +
                                 '<div class="header"><i class="fa fa-lock"></i> Área Restrita</div>' +
                                 '<form name="loginForm" autocomplete="off" novalidate>' +
                                     '<div class="body bg-gray">' +
