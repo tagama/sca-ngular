@@ -107,6 +107,7 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
                 service.authenticate({}, function (userDetails) {
                     service.setUserDetails(userDetails);
                     authService.loginConfirmed(obj);
+		    console.log('Teste de pull request')
                 });
 
             };
