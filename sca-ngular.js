@@ -1,3 +1,5 @@
+(function () {
+
 'use strict';
 
 angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
@@ -6,7 +8,6 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
 
     })
     .controller('loginController', ['$scope', 'loginService', 'authService', '$document', '$sanitize','$base64', function ($scope, loginService, authService, $document, $sanitize,$base64) {
-
         $scope.authenticationError = false;
 
         function sanitizeCredentials() {
@@ -35,7 +36,6 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
         function limpaForm() {
             $scope.username = null;
             $scope.password = null;
-
         }
 
     }])
@@ -43,7 +43,6 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
 
         $scope.logout = function () {
             loginService.logout();
-
         };
 
         $scope.changePerfil = function (perfil) {
@@ -108,7 +107,6 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
                     service.setUserDetails(userDetails);
                     authService.loginConfirmed(obj);
                 });
-
             };
 
             service.logout = function (data) {
@@ -117,7 +115,6 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
                 service.logoutApi(function (success) {
                     $rootScope.$broadcast('event:userLogout');
                 });
-
             };
 
             service.setUserDetails = function (data) {
@@ -130,19 +127,39 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
             return service;
         }
     ])
+    .constant('secureResource', {
+            name: function (name){
+                return 'ROLE_' + name;
+            }
+    })
+
+    .factory('permissionService', ['loginService', 'secureResource',
+            function (loginService, secureResource) {
+                var service = {
+                    hasPermission : function (name){
+                        return loginService.getCurrentUser().permissions[secureResource.resource(name)];
+                    }
+                }
+                return service;
+            }
+     ])
+
     .directive('authenticatedApplication', function (loginService, $document, $location) {
         return {
             restrict: 'A',
             link: function (scope, elem, attrs) {
 
                 scope.isAuthenticated = false;
+                scope.loadingPanel = true;
 
                 if (loginService.getCurrentUser() === null || loginService.getCurrentUser().username === null || loginService.getCurrentUser().username === '') {
                     loginService.authenticate({}, function (data) {
                         scope.isAuthenticated = true;
                         loginService.setUserDetails(data);
+                        scope.loadingPanel = false;
                     }, function (data) {
                         scope.isAuthenticated = false;
+                        scope.loadingPanel = false;
                     });
                 }
                 elem.removeClass('waiting-for-angular');
@@ -162,7 +179,7 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
     .directive('loginPanel', function () {
         return {
             restrict: 'A',
-            template: '<div block-ui block-ui-pattern="/.*\/api\/authentication/"><div class="form-box" id="login-box" ng-controller="loginController" ng-if="isAuthenticated"><div class="header"><i class="fa fa-lock"></i> Área Restrita</div><form name="loginForm" autocomplete="off"><div class="body bg-gray"><div class="form-group" show-errors><input auto-focus type="text" name="username" ng-model="username" class="form-control" placeholder="Login"/><span class="help-block" ng-show="loginForm.username.$error.required">Obrigatório</span></div><div class="form-group" show-errors><input type="password" name="password" ng-model="password" class="form-control" placeholder="Senha"/><span class="help-block" ng-show="loginForm.password.$error.required">Obrigatório</span></div></div><div class="footer bg-gray"><button type="submit" ng-click="submit()" class="btn btn-primary btn-block">Autenticar</button><div class="alert alert-danger alert-dismissable" ng-show="authenticationError"><b>Usuário ou senha inválida!</b></div></div></form></div></div>'
+            template: '<div block-ui block-ui-pattern="/.*\/api\/authentication/"><div class="form-box" id="login-box" ng-controller="loginController" ng-hide="isAuthenticated || loadingPanel"><div class="header"><i class="fa fa-lock"></i> Área Restrita</div><form name="loginForm" autocomplete="off"><div class="body bg-gray"><div class="form-group" show-errors><input type="text" name="username" ng-model="username" class="form-control" placeholder="Login"/><span class="help-block" ng-show="loginForm.username.$error.required">Obrigatório</span></div><div class="form-group" show-errors><input type="password" name="password" ng-model="password" class="form-control" placeholder="Senha"/><span class="help-block" ng-show="loginForm.password.$error.required">Obrigatório</span></div></div><div class="footer bg-gray"><button type="submit" ng-click="submit()" class="btn btn-primary btn-block">Autenticar</button><div class="alert alert-danger alert-dismissable" ng-show="authenticationError"><b>Usuário ou senha inválida!</b></div></div></form></div></div>'
         }
     })
     .directive('userPanel', function () {
@@ -170,16 +187,39 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
             restrict: 'A',
             template:
             '<div class="navbar-right" ng-controller="userController" ng-show="isAuthenticated">' +
-                '<ul class="nav navbar-nav">' +
-                    '<li class="dropdown user user-menu">' +
-                        '<a href="" class="dropdown-toggle" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i></a>' +
-                        '<ul class="dropdown-menu">' +
-                            '<li class="user-header bg-light-blue"  style="height: auto;"><p><small>{{user.login}}</small></p><p>{{user.nome}}<small>Perfil: {{user.perfil}}</small></p></li>' +
-                            '<li class="user-footer"><div class="pull-right"><a href="" ng-click="logout()" class="btn btn-danger" style="color:white;"> Sair</a></div></li>' +
-                        '</ul>' +
-                    '</li>' +
-                '</ul>' +
+            '<ul class="nav navbar-nav">' +
+            '<li class="dropdown user user-menu">' +
+            '<a href="" class="dropdown-toggle" data-toggle="dropdown"> <i class="glyphicon glyphicon-user"></i></a>' +
+            '<ul class="dropdown-menu">' +
+            '<li class="user-header bg-light-blue"  style="height: auto;"><p><small>{{user.login}}</small></p><p>{{user.nome}}<small>Perfil: {{user.perfil}}</small></p></li>' +
+            '<li class="user-footer"><div class="pull-right"><a href="" ng-click="logout()" class="btn btn-danger" style="color:white;"> Sair</a></div></li>' +
+            '</ul>' +
+            '</li>' +
+            '</ul>' +
             '</div>'
         }
-    });
+    })
+
+    .run(['$rootScope','loginService', '$location', '$route', 'secureResource', function($rootScope, loginService, $location,  $route, secureResource) {
+            $rootScope.$on('$routeChangeStart', function (event, next, current) {
+                //nenhuma permissão necessária
+                if (next.requiredPermission == undefined) return
+
+                //loginService.getCurrentUser() só será undefined com F5 na página, e o usuário não conseguirá dar F5 em pagina q não pode ver
+                if (loginService.getCurrentUser() && !loginService.getCurrentUser().permissions[secureResource.name(next.requiredPermission)]) {
+                    console.log(secureResource.name(next.requiredPermission))
+                    $location.path( "/" );
+                }
+            });
+
+             //se realizar o login direto na pagina ex /#/documentos-analise, não dispara $routeChangeStart,
+              //pois não á mudança de rota. É disparado manualmente nesses casos para verificar se pode ou nao exibir
+             $rootScope.$on('event:userDetailsPrepared', function (event, next, current) {
+                    $rootScope.$broadcast('$routeChangeStart', $route.current);
+
+             });
+     }]);
+
+})();
+
 
