@@ -10,7 +10,7 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
     .controller('loginController', ['$scope', 'loginService', 'authService', '$document', '$sanitize','$base64', function ($scope, loginService, authService, $document, $sanitize,$base64) {
         $scope.authenticationError = false;
 
-        function sanitizeCredentials() {
+        function sanitizedCredentials() {
             return {
                 username: $sanitize($scope.username),
                 password: $base64.encode($sanitize($scope.password)),
@@ -22,7 +22,7 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
 
             $scope.authenticationError = false;
 
-            loginService.login(sanitizeCredentials(),
+            loginService.login(sanitizedCredentials(),
                 function (data) {
                     loginService.activateLogin(data);
                     limpaForm();
@@ -137,14 +137,17 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
             function (loginService, secureResource) {
                 var service = {
                     hasPermission : function (name){
-                        return loginService.getCurrentUser().permissions[secureResource.resource(name)];
+                         if(loginService.getCurrentUser()){
+                            return loginService.getCurrentUser().permissions[secureResource.name(name)];
+                         }
+                         return false;
                     }
                 }
                 return service;
             }
      ])
 
-    .directive('authenticatedApplication', function (loginService, $document, $location) {
+    .directive('authenticatedApplication',['loginService', '$document', '$location', 'permissionService', function (loginService, $document, $location, permissionService) {
         return {
             restrict: 'A',
             link: function (scope, elem, attrs) {
@@ -173,9 +176,13 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
                 scope.$on('event:userLogout', function () {
                     scope.isAuthenticated = false;
                 });
+
+                scope.hasPermission = function(resource){
+                    return permissionService.hasPermission(resource)
+                }
             }
         }
-    })
+    }])
     .directive('loginPanel', function () {
         return {
             restrict: 'A',
@@ -201,23 +208,23 @@ angular.module('sca-ngular', ['http-auth-interceptor', 'base64'])
     })
 
     .run(['$rootScope','loginService', '$location', '$route', 'secureResource', function($rootScope, loginService, $location,  $route, secureResource) {
-            $rootScope.$on('$routeChangeStart', function (event, next, current) {
-                //nenhuma permissão necessária
-                if (next.requiredPermission == undefined) return
+        $rootScope.$on('$routeChangeStart', function (event, next, current) {
+            //nenhuma permissão necessária
+            if (next.requiredPermission == undefined) return
 
-                //loginService.getCurrentUser() só será undefined com F5 na página, e o usuário não conseguirá dar F5 em pagina q não pode ver
-                if (loginService.getCurrentUser() && !loginService.getCurrentUser().permissions[secureResource.name(next.requiredPermission)]) {
-                    console.log(secureResource.name(next.requiredPermission))
-                    $location.path( "/" );
-                }
-            });
+            //loginService.getCurrentUser() só será undefined com F5 na página, e o usuário não conseguirá dar F5 em pagina q não pode ver
+            if (loginService.getCurrentUser() && !loginService.getCurrentUser().permissions[secureResource.name(next.requiredPermission)]) {
+                //console.log(secureResource.name(next.requiredPermission))
+                $location.path( "/" );
+            }
+        });
 
-             //se realizar o login direto na pagina ex /#/documentos-analise, não dispara $routeChangeStart,
-              //pois não á mudança de rota. É disparado manualmente nesses casos para verificar se pode ou nao exibir
-             $rootScope.$on('event:userDetailsPrepared', function (event, next, current) {
-                    $rootScope.$broadcast('$routeChangeStart', $route.current);
+        //se realizar o login direto na pagina ex /#/documentos-analise, não dispara $routeChangeStart,
+        //pois não á mudança de rota. É disparado manualmente nesses casos para verificar se pode ou nao exibir
+        $rootScope.$on('event:userDetailsPrepared', function (event, next, current) {
+            $rootScope.$broadcast('$routeChangeStart', $route.current);
 
-             });
+        });
      }]);
 
 })();
