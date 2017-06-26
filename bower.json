@@ -3,7 +3,7 @@
         "name": "https://github.com/tagama"
     },
     "name": "sca-ngular",
-    "version": "0.1.2",
+    "version": "0.1.4",
     "ignore": [],
     "main": ["./sca-ngular.js"],
     "dependencies": {
